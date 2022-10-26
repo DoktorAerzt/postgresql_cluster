@@ -8,6 +8,14 @@
     - vars/main.yml
   vars:
     minimal_ansible_version: 2.7.0
+  vars_prompt:
+    - name: vault_user
+      prompt: Please type in your vault username
+      private: no
+
+    - name: vault_password
+      prompt: Please type in your vault user password
+      private: yes
   tasks:
     - name: Checking ansible version
       fail:
