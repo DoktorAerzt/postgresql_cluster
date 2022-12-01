@@ -1,6 +1,5 @@
 ---
 # yamllint disable rule:line-length
-
 - name: Install pgbouncer package
   package:
     name: pgbouncer

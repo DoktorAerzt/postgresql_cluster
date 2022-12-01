@@ -11,22 +11,22 @@
     - name: Get patroni superuser username from Vault
       set_fact:
         patroni_superuser_username: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_superuser_username }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
-      when: '":" in patroni_superuser_username'
+      when: '":" in patroni_superuser_username and vault_use|bool'
 
     - name: Get patroni superuser password from Vault
       set_fact:
         patroni_superuser_password: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_superuser_password }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
-      when: '":" in patroni_superuser_password'
+      when: '":" in patroni_superuser_password and vault_use|bool'
 
     - name: Get patroni replication username from Vault
       set_fact:
         patroni_replication_username: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_replication_username }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
-      when: '":" in patroni_replication_username'
+      when: '":" in patroni_replication_username and vault_use|bool'
 
     - name: Get patroni replication password from Vault
       set_fact:
         patroni_replication_password: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_replication_password }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
-      when: '":" in patroni_replication_password'
+      when: '":" in patroni_replication_password and vault_use|bool'
 
   when: vault_use|bool
   tags: hashi_vault

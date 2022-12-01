@@ -1,8 +1,12 @@
 ---
 # yamllint disable rule:line-length
 
+
+
 - name: Make sure handlers are flushed immediately
   meta: flush_handlers
+
+  
 
 - block:
     - name: Check postgresql cluster health

@@ -22,6 +22,34 @@
         msg: "Ansible version must be {{ minimal_ansible_version }} or higher"
       when: ansible_version.full is version(minimal_ansible_version, '<')
 
+    - name: Login to Vault and generate token
+      community.hashi_vault.vault_login:
+        url: "{{ vault_url }}"
+        auth_method: "{{ vault_auth_method }}"
+        username: "{{ vault_user }}"
+        password: "{{ vault_password }}"
+      register: login_data
+
+    - name: Get patroni superuser username from Vault
+      set_fact:
+        patroni_superuser_username: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_superuser_username }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
+      when: '":" in patroni_superuser_username and vault_use|bool'
+
+    - name: Get patroni superuser password from Vault
+      set_fact:
+        patroni_superuser_password: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_superuser_password }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
+      when: '":" in patroni_superuser_password and vault_use|bool'
+
+    - name: Get patroni replication username from Vault
+      set_fact:
+        patroni_replication_username: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_replication_username }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
+      when: '":" in patroni_replication_username and vault_use|bool'
+
+    - name: Get patroni replication password from Vault
+      set_fact:
+        patroni_replication_password: "{{ lookup('community.hashi_vault.hashi_vault', 'secret={{ patroni_replication_password }} token={{ login_data.login.auth.client_token }} url={{vault_url}}') }}"
+      when: '":" in patroni_replication_password and vault_use|bool'
+
 - name: Gathering facts from all servers
   hosts: all
   gather_facts: true
@@ -179,8 +207,18 @@
 
     - role: pgbouncer
       when: pgbouncer_install|bool
+      vars:
+        patroni_superuser_username: "{{ hostvars['localhost']['patroni_superuser_username'] }}"
+        patroni_superuser_password: "{{ hostvars['localhost']['patroni_superuser_password'] }}"
+        patroni_replication_username: "{{ hostvars['localhost']['patroni_replication_username'] }}"
+        patroni_replication_password: "{{ hostvars['localhost']['patroni_replication_password'] }}"
 
     - role: patroni
+      vars:
+        patroni_superuser_username: "{{ hostvars['localhost']['patroni_superuser_username'] }}"
+        patroni_superuser_password: "{{ hostvars['localhost']['patroni_superuser_password'] }}"
+        patroni_replication_username: "{{ hostvars['localhost']['patroni_replication_username'] }}"
+        patroni_replication_password: "{{ hostvars['localhost']['patroni_replication_password'] }}"
 
     - role: vip-manager
       when: not with_haproxy_load_balancing|bool and
@@ -207,5 +245,10 @@
 
     # finish (info)
     - role: deploy-finish
+      vars:
+        patroni_superuser_username: "{{ hostvars['localhost']['patroni_superuser_username'] }}"
+        patroni_superuser_password: "{{ hostvars['localhost']['patroni_superuser_password'] }}"
+        patroni_replication_username: "{{ hostvars['localhost']['patroni_replication_username'] }}"
+        patroni_replication_password: "{{ hostvars['localhost']['patroni_replication_password'] }}"
 
 ...
